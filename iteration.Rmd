@@ -72,5 +72,38 @@ mean_and_sd(x_vec)
 mean_and_sd(y_vec)
 ```
 
+## Different sample sizes, means, sds
+```{r}
+sim_data = 
+  tibble(
+    x = rnorm(30, mean = 2, sd = 3)
+  )
+
+sim_data %>% 
+  summarize(
+    mean = mean(x),
+    sd = sd(x)
+  )
+```
+
+function that simulates data, compute mean and sd.
+```{r}
+sim_mean_sd = function(n, mu, sigma){
+  sim_data = 
+  tibble(
+    x = rnorm(n, mean = mu, sd = sigma)
+  )
+
+  sim_data %>% 
+    summarize(
+      mean = mean(x),
+      sd = sd(x)
+    )
+}
+
+sim_mean_sd(30, 4, 3)
+```
+
+
 
 
