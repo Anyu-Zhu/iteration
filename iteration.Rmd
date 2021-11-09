@@ -173,7 +173,123 @@ bind_rows(
   get_page_reviews(urls[5]))
 ```
 
+## Lists
+```{r}
+l = list(
+  vec_numeric = 5:8,
+  vec_logical = c(TRUE, FALSE),
+  summary = summary(rnorm(1000, mean = 5, sd = 3))
+)
 
+l[[3]]
+
+l[["summary"]]
+```
+
+## List of normals
+```{r}
+list_norms = 
+  list(
+    a = rnorm(50, mean = 2, sd = 1),
+    b = rnorm(50, mean = 5, sd = 3),
+    c = rnorm(50, mean = 10, sd = 1.5),
+    d = rnorm(50, mean = -8, sd = 4)
+  )
+
+mean_and_sd(list_norms[[1]])
+```
+
+## for loop
+
+to iterate over the list of normals
+```{r}
+output = vector("list", length = 4)
+
+for (i in 1:4){
+  output[[1]] = mean_and_sd(list_norms[[1]])
+}
+```
+
+use map:
+
+```{r}
+output = map(list_norms, mean_and_sd)
+
+output_2 = map(list_norms, summary)
+```
+
+## List Columns
+```{r}
+listcol_df = 
+  tibble(
+    name = c("a", "b", "c", "d"),
+    norms = list_norms
+  )
+
+listcol_df %>% pull(name)
+listcol_df %>% pull(norms)
+listcol_df %>% filter(name == "a")
+
+listcol_df %>% 
+  mutate(summaries = map(listcol_df$norms, mean_and_sd))
+```
+
+## Nested data
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+Nest data within location
+
+```{r}
+weather_nested = nest(weather_df, data = date:tmin)
+
+unnest(weather_nested, data)
+
+weather_nested %>% pull(data)
+
+lm(tmax ~ tmin, data = weather_nested$data[[3]])
+
+weather_lm = function(df){
+  lm(tmax ~ tmin, data = df)
+}
+
+weather_lm(weather_nested$data[[1]])
+
+map(weather_nested$data, weather_lm)
+
+weather_nested %>% 
+  mutate(lm_results = map(data, weather_lm))
+```
+
+## Napoleon
+
+```{r}
+map(urls, get_page_reviews)
+
+napoleon_df = tibble(
+  urls = urls
+)
+
+napoleon_df %>% 
+  mutate(reviews = map(urls, get_page_reviews)) %>% 
+  select(reviews) %>% 
+  unnest()
+```
 
 
 
