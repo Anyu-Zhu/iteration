@@ -291,6 +291,41 @@ napoleon_df %>%
   unnest()
 ```
 
+Simulation
+
+start with a for loop
+```{r}
+output = vector("list", length = 100)
+
+for (i in 1:100){
+  output[[i]] = sim_mean_sd(30, 3, 4)
+}
+
+bind_rows(output)
+```
+
+use a loop function
+```{r}
+sim_results = 
+  rerun(100, sim_mean_sd(30, 3, 4)) %>% 
+  bind_rows()
+```
+
+look at results
+```{r}
+sim_results %>% 
+  ggplot(aes(x = mean)) + geom_density()
+
+sim_results %>% 
+  summarize(
+    avg_sample_mean = mean(mean),
+    ad_samp_mean = sd(mean)
+  )
+
+sim_results %>% 
+  ggplot(aes(x = sd)) + geom_density()
+```
+
 
 
 
